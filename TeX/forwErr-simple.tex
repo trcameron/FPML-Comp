@@ -1,0 +1,65 @@
+\documentclass{standalone}
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usetikzlibrary{pgfplots.groupplots}
+\pgfplotsset{compat=1.14}
+
+\DeclareMathOperator{\cond}{cond}
+
+\begin{document}
+
+\begin{tikzpicture}
+\begin{groupplot}[
+	group style = {
+		group size = 2 by 2,
+		ylabels at = edge left,
+		yticklabels at = edge left,
+		horizontal sep = 15pt,
+		vertical sep = 50pt,
+	},
+	ylabel = {Relative Forward Error},
+	legend pos = north west,
+	legend style = {nodes={scale=0.55}},
+    	legend image code/.code={
+    	\draw[mark repeat=2,mark phase=2]
+    	plot coordinates {
+    		(0cm,0cm)
+    		(0.3cm,0cm)        %% default is (0.3cm,0cm)
+    		(0.5cm,0cm)         %% default is (0.6cm,0cm)
+   	 };%
+    	},
+    	cycle list name=black white
+]
+\nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Chebyshev]
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_cheby.dat};
+\addlegendentry{FPML}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_cheby.dat};
+\addlegendentry{FPML-CP}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_cheby.dat};
+\addlegendentry{C02AFF}
+\nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Prescribed Roots]
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_presc.dat};
+\addlegendentry{FPML}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_presc.dat};
+\addlegendentry{FPML-CP}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_presc.dat};
+\addlegendentry{C02AFF}
+\nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Small Imaginary Part]
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_smallimag.dat};
+\addlegendentry{FPML}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_smallimag.dat};
+\addlegendentry{FPML-CP}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_smallimag.dat};
+\addlegendentry{C02AFF}
+\nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Wilkinson]
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_wilk.dat};
+\addlegendentry{FPML}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_wilk.dat};
+\addlegendentry{FPML-CP}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_wilk.dat};
+\addlegendentry{C02AFF}
+\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

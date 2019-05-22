@@ -1,0 +1,25 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usetikzlibrary{pgfplots.groupplots}
+\pgfplotsset{compat=1.14}
+
+\begin{document}
+
+\begin{tikzpicture}
+\begin{loglogaxis}[
+    xlabel = {Condition Number},
+    ylabel = {Relative Forward Error},
+    legend pos = outer north east,
+]
+\addplot table [x=cond, y=stan_err_bound, col sep=comma]{../data_files/horner_aprioriErr_real.dat};
+\addlegendentry{Standard Error Bound}
+\addplot table [x=cond, y=stan_err, col sep=comma]{../data_files/horner_aprioriErr_real.dat};
+\addlegendentry{Standard Error}
+\addplot table [x=cond, y=comp_err_bound, col sep=comma]{../data_files/horner_aprioriErr_real.dat};
+\addlegendentry{Compensated Error Bound}
+\addplot table [x=cond, y=comp_err, col sep=comma]{../data_files/horner_aprioriErr_real.dat};
+\addlegendentry{Compensated Error}
+\end{loglogaxis}
+\end{tikzpicture}
+
+\end{document}

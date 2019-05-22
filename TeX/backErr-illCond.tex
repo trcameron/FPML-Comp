@@ -1,0 +1,50 @@
+\documentclass{standalone}
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usetikzlibrary{pgfplots.groupplots}
+\pgfplotsset{compat=1.14}
+
+\DeclareMathOperator{\cond}{cond}
+
+\begin{document}
+
+\begin{tikzpicture}
+\begin{groupplot}[
+	group style = {
+		group size = 2 by 1,
+		ylabels at = edge left,
+		yticklabels at = edge left,
+		horizontal sep = 15pt,
+	},
+	ylabel = {Relative Backward Error},
+	legend pos = north west,
+	legend style = {nodes={scale=0.55}},
+    	legend image code/.code={
+    	\draw[mark repeat=2,mark phase=2]
+    	plot coordinates {
+    		(0cm,0cm)
+    		(0.3cm,0cm)        %% default is (0.3cm,0cm)
+    		(0.5cm,0cm)         %% default is (0.6cm,0cm)
+   	 };%
+    	},
+    	cycle list name=black white
+]
+\nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Roots in the Unit Disk]
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/backerr_illcond_unit.dat};
+\addlegendentry{FPML}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-P_err, col sep=comma]{../data_files/backerr_illcond_unit.dat};
+\addlegendentry{FPML-P}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/backerr_illcond_unit.dat};
+\addlegendentry{FPML-CP}
+\nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Truncated Exponential]
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/backerr_illcond_trunc.dat};
+\addlegendentry{FPML}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-P_err, col sep=comma]{../data_files/backerr_illcond_trunc.dat};
+\addlegendentry{FPML-P}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/backerr_illcond_trunc.dat};
+\addlegendentry{FPML-CP}
+\end{groupplot}
+\end{tikzpicture}
+
+\end{document}
