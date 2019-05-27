@@ -310,7 +310,7 @@ contains
         real(kind=dp)                   :: ang, r, th
         integer, dimension(deg+1)       :: h
         real(kind=dp), dimension(deg+1) :: a
-        real(kind=dp), parameter        :: pi2 = 6.2831853071795865d0, sigma = 0.7d0
+        real(kind=dp), parameter        :: pi2 = 6.2831853071795865_dp, sigma = 0.7_dp
         ! intrinsic functions
         intrinsic                       :: log, cos, sin, cmplx
         
@@ -327,7 +327,7 @@ contains
         th=pi2/deg
         do i=c-1,1,-1
             nzeros = h(i)-h(i+1)
-            r = (alpha(h(i+1))/alpha(h(i)))**(1d0/nzeros)
+            r = (alpha(h(i+1))/alpha(h(i)))**(1.0_dp/nzeros)
             ang = pi2/nzeros
             DO j=1,nzeros
                 roots(k+j) = r*cmplx(cos(ang*j+th*h(i)+sigma),sin(ang*j+th*h(i)+sigma),kind=dp)
