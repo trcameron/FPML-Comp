@@ -319,7 +319,7 @@ contains
             if(alpha(i)>0) then
                 a(i) = log(alpha(i))
             else
-                a(i) = -1d+30
+                a(i) = -1E+30_dp
             end if
         end do
         call conv_hull(deg+1, a, h, c)
