@@ -2,12 +2,12 @@
 !   EFT: Error-Free Transformations and Compensated Arithmetic Routines
 !   Author: Thomas R. Cameron and Aidan O'Neill
 !   Institution: Davidson College, Mathematics and Computer Science Department
-!   Last Modified: 21 March 2019
+!   Last Modified: 29 March 2020
 !********************************************************************************
 module eft
     implicit none
     integer, parameter                          :: dp = kind(1.d0), factor = 2**27 + 1
-    real(kind=dp), parameter                    :: mu = 2.0_dp**(-53), eps = 2.0_dp**(-52)
+    real(kind=dp), parameter                    :: big = huge(1.0_dp), eps = 2.0_dp**(-52), mu = 2.0_dp**(-53), small = tiny(1.0_dp)
     !********************************************************
     !   REFT: Real Error Free Transformation type.
     !********************************************************
@@ -86,7 +86,7 @@ module eft
 contains
 
     !********************************************************
-    !                       TwoSum                          *
+    !                       Two Sum                         *
     !********************************************************
     ! Computes the sum of two floating-point numbers
     ! a and b. The result and error is returned in
@@ -108,7 +108,7 @@ contains
         return
     end function TwoSum
     !********************************************************
-    !                       TwoSumCplx                      *
+    !                       Two Sum Cplx                    *
     !********************************************************
     ! Computes the sum of two complex floating-point 
     ! numbers a and b. The result and error is 
@@ -153,7 +153,7 @@ contains
         return
     end function Split
     !********************************************************
-    !                       TwoProduct                      *
+    !                       Two Product                     *
     !********************************************************
     ! Computes the product of two floating-point
     ! numbers a and b. The result and error is 
@@ -176,7 +176,7 @@ contains
         return
     end function TwoProduct
     !********************************************************
-    !                       TwoProductCplx                  *
+    !                       Two Product Cplx                *
     !********************************************************
     ! Computes the product of two complex floating-point 
     ! numbers a and b. The result and error is returned 
@@ -190,25 +190,25 @@ contains
         real(kind=dp)       :: z1, z2, z3, z4
         type(REFT)          :: sra, sia, srb, sib, sumr, sumi
         type(CEFTProd)      :: comp
-            
+        
         ! perform splitting of real(a), imag(a), real(b), imag(b)
         sra = Split(real(a)); sia = Split(aimag(a))
         srb = Split(real(b)); sib = Split(aimag(b))
         ! compute product of real and imaginary parts
         z1 = real(a) * real(b); z2 = aimag(a) * aimag(b)
         z3 = real(a) * aimag(b); z4 = aimag(a) * real(b)
-        ! error in z1 and z3
-        comp%e = cmplx(sra%y * srb%y - (((z1 - sra%x * srb%x) - sra%y * srb%x) - sra%x * srb%y),&
-                    sra%y * sib%y - (((z3 - sra%x * sib%x) - sra%y * sib%x) - sra%x * sib%y),kind=dp)
-        ! error in z2 and z4
-        comp%f = cmplx(-(sia%y * sib%y - (((z2 - sia%x * sib%x) - sia%y * sib%x) - sia%x * sib%y)),&
-                    sia%y * srb%y - (((z4 - sia%x * srb%x) - sia%y * srb%x) - sia%x * srb%y),kind=dp)
         ! compute sum z1-z2
         sumr = TwoSum(z1,-z2)
         ! compute sum z3+z4
         sumi = TwoSum(z3,z4)
-        ! store floating-point result
+        ! floating-point result
         comp%p = cmplx(sumr%x,sumi%x,kind=dp)
+        ! error in z1 and z3
+        comp%e = cmplx(sra%y * srb%y - (((z1 - sra%x * srb%x) - sra%y * srb%x) - sra%x * srb%y),&
+                        sra%y * sib%y - (((z3 - sra%x * sib%x) - sra%y * sib%x) - sra%x * sib%y),kind=dp)
+        ! error in z2 and z4
+        comp%f = cmplx(-sia%y * sib%y + (((z2 - sia%x * sib%x) - sia%y * sib%x) - sia%x * sib%y),&
+                        sia%y * srb%y - (((z4 - sia%x * srb%x) - sia%y * srb%x) - sia%x * srb%y),kind=dp)
         ! error in sums
         comp%g = cmplx(sumr%y,sumi%y,kind=dp)
         return
@@ -281,7 +281,7 @@ contains
         return
     end function EFTHornerCplx
     !****************************************************
-    !                       NextPowerTwo                *
+    !                       Next Power Two              *
     !****************************************************
     ! Computation of 2^ceil(log2(abs(p))), for p \neq 0.          
     !****************************************************
@@ -300,7 +300,7 @@ contains
         return
     end function NextPowerTwo
     !****************************************************
-    !                       FaithSum                    *
+    !                       Faith Sum                   *
     !****************************************************
     ! Computes the faithful sum of the real floating-
     ! point numbers a, b, c, and d. Result is returned
@@ -334,7 +334,7 @@ contains
         phi = mu*Ms
         fac = eps*Ms*Ms
         ! main loop
-        t = 0
+        t = 0.0_dp
         do while(.True.)
             q = (sigma + p) - sigma
             tau = sum(q)
@@ -361,7 +361,7 @@ contains
         end do
     end function FaithSum
     !****************************************************
-    !                       FaithSumCplx                *
+    !                       Faith Sum Cplx              *
     !****************************************************
     ! Computes the faithful sum of the complex floating-
     ! point numbers a, b, c, and d. Result is returned
@@ -376,5 +376,6 @@ contains
         
         comp = cmplx(FaithSum(real(a),real(b),real(c),real(d)),&
                     FaithSum(aimag(a),aimag(b),aimag(c),aimag(d)),kind=dp)
+        return
     end function FaithSumCplx
 end module eft

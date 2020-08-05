@@ -5,8 +5,6 @@
 \usetikzlibrary{pgfplots.groupplots}
 \pgfplotsset{compat=1.14}
 
-\DeclareMathOperator{\cond}{cond}
-
 \begin{document}
 
 \begin{tikzpicture}
@@ -32,33 +30,33 @@
     	cycle list name=black white
 ]
 \nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Chebyshev]
-\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_cheby.dat};
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML-err, col sep=comma]{../data_files/forwerr_cheby.dat};
 \addlegendentry{FPML}
-\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_cheby.dat};
-\addlegendentry{FPML-CP}
-\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_cheby.dat};
-\addlegendentry{C02AFF}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-Quad-err, col sep=comma]{../data_files/forwerr_cheby.dat};
+\addlegendentry{FPML-Quad}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=FPML-Comp-err, col sep=comma]{../data_files/forwerr_cheby.dat};
+\addlegendentry{FPML-Comp}
 \nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Prescribed Roots]
-\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_presc.dat};
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML-err, col sep=comma]{../data_files/forwerr_presc.dat};
 \addlegendentry{FPML}
-\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_presc.dat};
-\addlegendentry{FPML-CP}
-\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_presc.dat};
-\addlegendentry{C02AFF}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-Quad-err, col sep=comma]{../data_files/forwerr_presc.dat};
+\addlegendentry{FPML-Quad}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=FPML-Comp-err, col sep=comma]{../data_files/forwerr_presc.dat};
+\addlegendentry{FPML-Comp}
 \nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Small Imaginary Part]
-\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_smallimag.dat};
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML-err, col sep=comma]{../data_files/forwerr_smallimag.dat};
 \addlegendentry{FPML}
-\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_smallimag.dat};
-\addlegendentry{FPML-CP}
-\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_smallimag.dat};
-\addlegendentry{C02AFF}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-Quad-err, col sep=comma]{../data_files/forwerr_smallimag.dat};
+\addlegendentry{FPML-Quad}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=FPML-Comp-err, col sep=comma]{../data_files/forwerr_smallimag.dat};
+\addlegendentry{FPML-Comp}
 \nextgroupplot[xlabel = {Degree}, xmode=log,ymode=log,title=Wilkinson]
-\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML_err, col sep=comma]{../data_files/forwerr_wilk.dat};
+\addplot+[thin, solid, mark=none] table [x=Degree, y=FPML-err, col sep=comma]{../data_files/forwerr_wilk.dat};
 \addlegendentry{FPML}
-\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-CP_err, col sep=comma]{../data_files/forwerr_wilk.dat};
-\addlegendentry{FPML-CP}
-\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=C02AFF_err, col sep=comma]{../data_files/forwerr_wilk.dat};
-\addlegendentry{C02AFF}
+\addplot+[thin, densely dotted, mark=none] table [x=Degree, y=FPML-Quad-err, col sep=comma]{../data_files/forwerr_wilk.dat};
+\addlegendentry{FPML-Quad}
+\addplot+[thin, dashdotted, mark=none] table [x=Degree, y=FPML-Comp-err, col sep=comma]{../data_files/forwerr_wilk.dat};
+\addlegendentry{FPML-Comp}
 \end{groupplot}
 \end{tikzpicture}
 

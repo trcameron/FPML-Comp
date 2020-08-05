@@ -10,10 +10,4 @@ FFLAGS := -O2
 LC := pdflatex
 
 # mpfun objects
-MPOBJS := mpfun/mpfun90.o mpfun/mpmod90.o mpfun/mpmodm90.o mpfun/mpmodx90.o
-
-# nag info
-#NAGDIR := /Users/thcameron/Documents/Research/c02aff
-#NAGINC := $(NAGDIR)/include
-#NAGOBJ := $(NAGDIR)/objects
-#FCOMPILE := gfortran -O2 -I $(NAGINC) $(NAGOBJ)/*.o
+MPOBJS := mpfun-mpfr-v10/fortran/*.o

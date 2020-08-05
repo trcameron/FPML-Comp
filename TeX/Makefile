@@ -3,18 +3,13 @@
 #####################################################
 include ../make.inc
 
-all: backErr-illCond backErr-wellCond forwErr \
-	horner_aprioriErr horner_runErr limitAcc \
-	newton_limitAcc special_poly clean
+all: backerr_illcond backerr_wellcond horner_runErr laguerre_limitAcc newton_limitAcc clean
+	
+backerr_illcond:
+	$(LC) backerr_illcond.tex
 
-backErr-illCond:
-	$(LC) backErr-illCond.tex
-	
-backErr-wellCond:
-	$(LC) backErr-wellCond-err.tex && $(LC) backErr-wellCond-time.tex
-	
-forwErr:
-	$(LC) forwErr-simple.tex
+backerr_wellcond:
+	$(LC) backerr_wellcond_err.tex && $(LC) backerr_wellcond_time.tex
 	
 clean: copy
 	@rm -f *.gz
@@ -25,17 +20,17 @@ clean: copy
 copy:
 	@cp -r *.pdf ../figures/
 	
-horner_aprioriErr:
-	$(LC) horner_aprioriErr_complex.tex && $(LC) horner_aprioriErr_real.tex
+forwerr_simple:
+	$(LC) forwerr_simple.tex
 
 horner_runErr:
-	$(LC) horner_runErr_complex.tex && $(LC) horner_runErr_real.tex
+	$(LC) horner_runErr_real.tex && $(LC) horner_runErr_cmplx.tex
+	
+laguerre_limitAcc:
+	$(LC) laguerre_limitAcc_real.tex && $(LC) laguerre_limitAcc_cmplx.tex
 	
 limitAcc:
 	$(LC) limitAcc.tex
 
 newton_limitAcc:
-	$(LC) newton_limitAcc_real.tex
-	
-special_poly:
-	$(LC) special_poly.tex
+	$(LC) newton_limitAcc_real.tex && $(LC) newton_limitAcc_cmplx.tex

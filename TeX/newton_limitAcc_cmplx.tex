@@ -1,0 +1,38 @@
+\documentclass{standalone}
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\usetikzlibrary{pgfplots.groupplots}
+\pgfplotsset{compat=1.14}
+
+\DeclareMathOperator{\cond}{cond}
+
+\begin{document}
+
+\begin{tikzpicture}
+\begin{loglogaxis}[
+	xlabel = {Condition Number},
+	ylabel = {Relative Forward Error},
+	legend pos = north west,
+	legend style = {nodes={scale=0.55}},
+	legend image code/.code={
+		\draw[mark repeat=2,mark phase=2]
+		plot coordinates {
+		(0cm,0cm)
+    		(0.3cm,0cm)        %% default is (0.3cm,0cm)
+    		(0.5cm,0cm)         %% default is (0.6cm,0cm)
+		};%
+	},
+	cycle list name=black white
+]
+\addplot+[thin,solid,mark=none] table [x=cond, y=stan_err_bound, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
+\addlegendentry{$\tilde{\gamma}_{2m}\cond(p,\zeta_{m})$}
+\addplot+[thin,dashdotted,mark=none] table [x=cond, y=stan_err, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
+\addlegendentry{Standard}
+\addplot+[thin,densely dashed,mark=none] table [x=cond, y=comp_err_bound, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
+\addlegendentry{$\mu+\tilde{\gamma}_{2m}^{2}\cond(p,\zeta_{m})$}
+\addplot+[thin,densely dotted,mark=none] table [x=cond, y=comp_err, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
+\addlegendentry{Compensated}
+\end{loglogaxis}
+\end{tikzpicture}
+
+\end{document}

@@ -30,22 +30,22 @@
     	cycle list name=black white
 ]
 \nextgroupplot[xlabel = {Condition Number}, xmode=log,ymode=log,title=Newton]
-\addplot+[thin, solid, mark=none] table [x=cond, y=stan_err_bound, col sep=comma]{../data_files/newton_limitAcc_complex.dat};
+\addplot+[thin, solid, mark=none] table [x=cond, y=stan_err_bound, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
 \addlegendentry{$\tilde{\gamma}_{2m}\cond(p,\zeta_{m})$}
-\addplot+[thin, dashdotted, mark=none] table [x=cond, y=stan_err, col sep=comma]{../data_files/newton_limitAcc_complex.dat};
+\addplot+[thin, dashdotted, mark=none] table [x=cond, y=stan_err, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
 \addlegendentry{Standard}
-\addplot+[thin, densely dashed, mark=none] table [x=cond, y=comp_err_bound, col sep=comma]{../data_files/newton_limitAcc_complex.dat};
+\addplot+[thin, densely dashed, mark=none] table [x=cond, y=comp_err_bound, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
 \addlegendentry{$\mu+\tilde{\gamma}_{2m}^{2}\cond(p,\zeta_{m})$}
-\addplot+[thin, densely dotted, mark=none] table [x=cond, y=comp_err, col sep=comma]{../data_files/newton_limitAcc_complex.dat};
+\addplot+[thin, densely dotted, mark=none] table [x=cond, y=comp_err, col sep=comma]{../data_files/newton_limitAcc_cmplx.dat};
 \addlegendentry{Compensated}
 \nextgroupplot[xlabel = {Condition Number}, xmode=log,ymode=log,title=Laguerre]
-\addplot+[thin, solid, mark=none] table [x=cond, y=stan_err_bound, col sep=comma]{../data_files/lag_limitAcc.dat};
+\addplot+[thin, solid, mark=none] table [x=cond, y=stan_err_bound, col sep=comma]{../data_files/laguerre_limitAcc_cmplx.dat};
 \addlegendentry{$\tilde{\gamma}_{2m}\cond(p,\zeta_{m})$}
-\addplot+[thin, dashdotted, mark=none] table [x=cond, y=stan_err, col sep=comma]{../data_files/lag_limitAcc.dat};
+\addplot+[thin, dashdotted, mark=none] table [x=cond, y=stan_err, col sep=comma]{../data_files/laguerre_limitAcc_cmplx.dat};
 \addlegendentry{Standard}
-\addplot+[thin, densely dashed, mark=none] table [x=cond, y=comp_err_bound, col sep=comma]{../data_files/lag_limitAcc.dat};
+\addplot+[thin, densely dashed, mark=none] table [x=cond, y=comp_err_bound, col sep=comma]{../data_files/laguerre_limitAcc_cmplx.dat};
 \addlegendentry{$\mu+\tilde{\gamma}_{2m}^{2}\cond(p,\zeta_{m})$}
-\addplot+[thin, densely dotted, mark=none] table [x=cond, y=comp_err, col sep=comma]{../data_files/lag_limitAcc.dat};
+\addplot+[thin, densely dotted, mark=none] table [x=cond, y=comp_err, col sep=comma]{../data_files/laguerre_limitAcc_cmplx.dat};
 \addlegendentry{Compensated}
 \end{groupplot}
 \end{tikzpicture}

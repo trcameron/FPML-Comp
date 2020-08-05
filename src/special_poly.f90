@@ -7,55 +7,46 @@
 ! special polynomial. 
 !********************************************************************************
 program special_poly
-    use fpml_comp
+    use fpml, only : main
+	use fpml_comp, only: main_comp
+	use fpml_quad, only: qp, main_quad
     use mproutines
-    implicit none
+	implicit none
     ! testing variables
     integer                                     :: deg, j, poly_num
     complex(kind=dp), dimension(:), allocatable :: exact_roots
     ! FPML variables
-    integer, parameter                          :: nitmax=30
-    logical, dimension(:), allocatable          :: conv
-    real(kind=dp), dimension(:), allocatable    :: berr, cond   
-    complex(kind=dp), dimension(:), allocatable :: p, roots
-    ! NAG variables
-    logical, parameter                          :: scal = .false.
-    integer                                     :: ifail
-    real(kind=dp), allocatable                  :: a(:,:), w(:), z(:,:)
-    complex(kind=dp), allocatable               :: zeros(:)
-    
-    call mpinit
+    integer, parameter                          :: itmax = 30
+    integer, allocatable                        :: conv(:)
+    real(kind=dp), allocatable                  :: berr(:), cond(:)
+	real(kind=qp), allocatable					:: berr_quad(:), cond_quad(:)
+    complex(kind=dp), allocatable               :: p(:), roots(:)
+	complex(kind=qp), allocatable				:: p_quad(:), roots_quad(:)
     
     ! Testing: special polynomials
     open(unit=1,file="data_files/special_poly.dat")
-    write(1,'(A)') 'Poly No., FPML, FPML-CP, C02AFF'
-    do poly_num=27,27
+    write(1,'(A)') 'Poly No., FPML, FPML-Quad, FPML-Comp'
+    do poly_num=1,35
         write(1, '(I10,A)', advance='no') poly_num, ', '
         ! make polynomial
         call make_poly(poly_num, deg, exact_roots, p)
-        ! FPML
+		! allocate
         allocate(roots(deg), berr(deg), cond(deg), conv(deg))
-        call main(p, deg, roots, berr, cond, conv, nitmax)
+		allocate(p_quad(deg+1), roots_quad(deg), berr_quad(deg), cond_quad(deg))
+        ! FPML, No Polish
+        call main(p, deg, roots, berr, cond, conv, itmax)
         write(1, '(ES15.2, A)', advance='no') max_rel_err(roots,exact_roots,deg), ', '
-        deallocate(roots, berr, cond, conv)
-        ! FPML-CP
-        allocate(roots(deg), berr(deg), cond(deg), conv(deg))
-        call MLPolish(p, deg, roots)
-        write(1, '(ES15.2, A)', advance='no') max_rel_err(roots,exact_roots,deg), ', '
-        deallocate(roots, berr, cond, conv)
-        ! C02AFF
-        allocate(a(2,0:deg),w(4*(deg+1)), z(2,deg), zeros(deg))
-        do j=0,deg
-            a(1,j) = dble(p(deg+1-j))
-            a(2,j) = aimag(p(deg+1-j))
-        end do
-        ifail = 0
-        call c02aff(a,deg,scal,z,w,ifail)
-        zeros = (/ (cmplx(z(1,j),z(2,j),kind=dp), j=1,deg)/)
-        write(1, '(ES15.2)') max_rel_err(zeros,exact_roots,deg)
-        deallocate(a,w,z,zeros)
-        ! deallocate polynomial arrays
-        deallocate(exact_roots, p)
+		! FPML, Quad
+		p_quad = p
+        call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+		roots = roots_quad
+		write(1, '(ES15.2, A)', advance='no') max_rel_err(roots,exact_roots,deg), ', '
+        ! FPML, Compensated Laguerre Polish
+        call main_comp(p, deg, roots, itmax)
+        write(1, '(ES15.2, A)') max_rel_err(roots,exact_roots,deg)
+        ! deallocate
+        deallocate(p, exact_roots, roots, berr, cond, conv)
+		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
     end do
     
     ! close file
@@ -85,7 +76,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(j,0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(2)
             ! Poly 2: Wilkinson deg 15
             deg = 15
@@ -93,7 +85,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(j,0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(3)
             ! Poly 3: Wilkinson deg 20
             deg = 20
@@ -101,7 +94,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(j,0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(4)
             ! Poly 4: scaled and shifted Wilkinson deg 20
             deg = 20
@@ -109,7 +103,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(dble(-21+2*(j-1))/10d0,0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(5)
             ! Poly 5: reverse Wilkinson deg 10
             deg = 10
@@ -117,7 +112,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(1d0/dble(j),0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(6)
             ! Poly 6: reverse Wilkinson deg 15
             deg = 15
@@ -125,7 +121,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(1d0/dble(j),0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(7)
             ! Poly 7: reverse Wilkinson deg 20
             deg = 20
@@ -133,7 +130,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(1d0/dble(j),0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(8)
             ! Poly 8: prescribed roots of varying scale deg 20
             deg = 20
@@ -141,7 +139,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(2d0**(-10+(j-1)),0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(9)
             ! Poly 9: prescribed roots of varying scale -3 deg 20
             deg = 20
@@ -149,7 +148,8 @@ contains
             ! roots
             exact_roots = (/ (cmplx(2d0**(-10+(j-1))-3d0,0,kind=dp), j=1,deg)/)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(10)
             ! Poly 10: Chebyshev polynomial deg 20
             deg = 20
@@ -502,7 +502,8 @@ contains
             exact_roots(2) = cmplx(-1d-8,0d0,kind=dp)
             exact_roots(3) = cmplx(1d0,0d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(16)
             ! Poly 16: Jenkins Traub p1(z) with a=1e-15
             deg = 3
@@ -512,7 +513,8 @@ contains
             exact_roots(2) = cmplx(-1d-15,0d0,kind=dp)
             exact_roots(3) = cmplx(1d0,0d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(17)
             ! Poly 17: Jenkins Traub p1(z) with a=1e+8
             deg = 3
@@ -522,7 +524,8 @@ contains
             exact_roots(2) = cmplx(-1d+8,0d0,kind=dp)
             exact_roots(3) = cmplx(1d0,0d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(18)
             ! Poly 18: Jenkins Traub p1(z) with a=1e+15
             deg = 3
@@ -532,7 +535,8 @@ contains
             exact_roots(2) = cmplx(-1d+15,0d0,kind=dp)
             exact_roots(3) = cmplx(1d0,0d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(19)
             ! Poly 19: Jenkins Traub p3(z) deg 10
             deg = 10
@@ -549,7 +553,8 @@ contains
             exact_roots(9) = cmplx(1d-9,0d0,kind=dp)
             exact_roots(10) = cmplx(1d-10,0d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(20)
             ! Poly 20: Jenkins Traub p3(z) deg 20
             deg = 20
@@ -576,7 +581,8 @@ contains
             exact_roots(19) = cmplx(1d-19,0d0,kind=dp)
             exact_roots(20) = cmplx(1d-20,0d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(21)
             ! Poly 21: Jenkins Traub p4(z)
             deg = 6
@@ -589,7 +595,8 @@ contains
             exact_roots(5) = 0.6_dp
             exact_roots(6) = 0.7_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(22)
             ! Poly 22: Jenkins Traub p5(z)
             deg = 10
@@ -606,7 +613,8 @@ contains
             exact_roots(9) = 0.3_dp
             exact_roots(10) = 0.4_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(23)
             ! Poly 23: Jenkins Traub p6(z)
             deg = 5
@@ -618,7 +626,8 @@ contains
             exact_roots(4) = 1.00002_dp
             exact_roots(5) = 0.99999_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(24)
             ! Poly 24: Jenkins Traub p7(z) with a=0
             deg = 7
@@ -632,7 +641,8 @@ contains
             exact_roots(6) = 1.0_dp
             exact_roots(7) = 10.0_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(25)
             ! Poly 25: Jenkins Traub p7(z) with a=10^(-10)
             deg = 7
@@ -646,7 +656,8 @@ contains
             exact_roots(6) = 1.0_dp
             exact_roots(7) = 10.0_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(26)
             ! Poly 26: Jenkins Traub p7(z) with a=10^(-6)
             deg = 7
@@ -660,7 +671,8 @@ contains
             exact_roots(6) = 1.0_dp
             exact_roots(7) = 10.0_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(27)
             ! Poly 27: Jenkins Traub p8(z)
             deg = 5
@@ -672,7 +684,8 @@ contains
             exact_roots(4) = -1.0_dp
             exact_roots(5) = -1.0_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(28)
             ! Poly 28: Jenkins Traub p9(z)
             deg = 20
@@ -699,7 +712,8 @@ contains
             exact_roots(19) = cmplx(+0.0030901699437494742410d0,+0.0095105651629515357212d0,kind=dp)
             exact_roots(20) = cmplx(+0.0030901699437494742410d0,-0.0095105651629515357212d0,kind=dp)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(29)
             ! Poly 29: Jenkins Traub p10(z) with a=1e+3
             deg = 3
@@ -709,7 +723,8 @@ contains
             exact_roots(2) = 1.0_dp
             exact_roots(3) = 1E-3_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(30)
             ! Poly 30: Jenkins Traub p10(z) with a=1e+6
             deg = 3
@@ -719,7 +734,8 @@ contains
             exact_roots(2) = 1.0_dp
             exact_roots(3) = 1E-6_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(31)
             ! Poly 31: Jenkins Traub p10(z) with a=1e+9
             deg = 3
@@ -729,7 +745,8 @@ contains
             exact_roots(2) = 1.0_dp
             exact_roots(3) = 1E-9_dp
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(32)
             ! Poly 32: Jenkins Traub p11(z) with m=15
             deg = 60
@@ -742,7 +759,8 @@ contains
                 exact_roots(15+j) = 0.9_dp*cmplx(cos(j*pi/30.0_dp),sin(j*pi/30.0_dp),kind=dp)
             end do
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(33)
             ! Poly 33: Jenkins Traub p11(z) with m=20
             deg = 80
@@ -755,7 +773,8 @@ contains
                 exact_roots(20+j) = 0.9_dp*cmplx(cos(j*pi/40.0_dp),sin(j*pi/40.0_dp),kind=dp)
             end do
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(34)
             ! Poly 34: Jenkins Traub p11(z) with m=25
             deg = 100
@@ -768,7 +787,8 @@ contains
                 exact_roots(25+j) = 0.9_dp*cmplx(cos(j*pi/50.0_dp),sin(j*pi/50.0_dp),kind=dp)
             end do
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(35)
             ! Poly 35: Cleve's Corner Polynomial
             deg = 6
@@ -781,7 +801,8 @@ contains
             exact_roots(5) = 1/exact_roots(2)
             exact_roots(6) = 1/exact_roots(3)
             ! polynomial
-            call RootCoeffCplx(deg,exact_roots,p)
+            p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
         end select
     end subroutine make_poly
     !************************************************

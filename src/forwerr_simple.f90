@@ -1,64 +1,57 @@
 !********************************************************************************
-!   FORWERR_SIMPLE: Compare the forward error of FPML, FPML-CP, and C02AFF.
-!   Author: Thomas R. Cameron, Davidson College
-!   Last Modified: 28 April 2019
-!********************************************************************************
-!   
+!   FORWERR_SIMPLE: Compare the forward error of FPML, FPML-Quad, and FPML-Comp
+!   Author: Thomas R. Cameron, Penn State Erie The Behrend College
+!   Last Modified: 31 July 2020
 !********************************************************************************
 program forwerr_simple
-    use fpml_comp
+    use fpml, only : main
+	use fpml_comp, only: main_comp
+	use fpml_quad, only: qp, main_quad
     use mproutines
-    implicit none
+	implicit none
     ! testing variables
     integer                                     :: deg, it, j, startDegree, endDegree, itnum
     real(kind=dp), allocatable                  :: results(:,:)
     complex(kind=dp), allocatable               :: exact_roots(:)
     ! FPML variables
-    integer, parameter                          :: nitmax = 30
-    logical, allocatable                        :: conv(:)
-    real(kind=dp), allocatable                  :: berr(:), cond(:)   
+    integer, parameter                          :: itmax = 30
+    integer, allocatable                        :: conv(:)
+    real(kind=dp), allocatable                  :: berr(:), cond(:)
+	real(kind=qp), allocatable					:: berr_quad(:), cond_quad(:)
     complex(kind=dp), allocatable               :: p(:), roots(:)
-    ! NAG variables
-    logical, parameter                          :: scal = .false.
-    integer                                     :: ifail
-    real(kind=dp), allocatable                  :: a(:,:), w(:), z(:,:)
-    complex(kind=dp), allocatable               :: zeros(:)
-    
-    call mpinit
-    
+	complex(kind=qp), allocatable				:: p_quad(:), roots_quad(:)
+	
     ! Test1: Chebyshev Polynomial
     startDegree = 5
     endDegree = 80
-    itnum = 10
+    itnum = 32
     open(unit=1,file="data_files/forwerr_cheby.dat")
-    write(1,'(A)') 'Degree, FPML_err, FPML-CP_err, C02AFF_err'
+    write(1,'(A)') 'Degree, FPML-err, FPML-Quad-err, FPML-Comp-err'
     allocate(results(itnum,3))
     deg = startDegree
     do while(deg<=endDegree)
         write(1,'(I10,A)', advance='no') deg, ', '
+		! allocate
         allocate(roots(deg), berr(deg), cond(deg), conv(deg))
-        allocate(a(2,0:deg),w(4*(deg+1)), z(2,deg), zeros(deg))
+		allocate(p_quad(deg+1), roots_quad(deg), berr_quad(deg), cond_quad(deg))
         ! polynomial
         call make_poly(1, deg, exact_roots, p)
-        do j=0,deg
-            a(1,j) = real(p(deg+1-j))
-            a(2,j) = aimag(p(deg+1-j))
-        end do
         do it=1,itnum
             ! FPML, No Polish
-            call main(p, deg, roots, berr, cond, conv, nitmax)
+            call main(p, deg, roots, berr, cond, conv, itmax)
             results(it,1) = max_rel_err(roots, exact_roots, deg)
+			! FPML, Quad
+			p_quad = p
+            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+			roots = roots_quad
+			results(it,2) = max_rel_err(roots, exact_roots, deg)
             ! FPML, Compensated Laguerre Polish
-            call MLPolish(p, deg, roots)
-            results(it,2) = max_rel_err(roots, exact_roots, deg)
-            ! C02AFF
-            ifail = 0
-            call c02aff(a,deg,scal,z,w,ifail)
-            zeros = (/ (cmplx(z(1,j),z(2,j),kind=dp), j=1,deg)/)
-            results(it,3) = max_rel_err(zeros, exact_roots, deg)
+            call main_comp(p, deg, roots, itmax)
+            results(it,3) = max_rel_err(roots, exact_roots, deg)
         end do
-        deallocate(roots, berr, cond, conv, a, w, z, zeros)
-        deallocate(exact_roots, p)
+		! deallocate
+        deallocate(p, exact_roots, roots, berr, cond, conv)
+		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
         ! write results to file
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,1))/itnum, ','
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,2))/itnum, ','
@@ -69,40 +62,38 @@ program forwerr_simple
     ! deallocate results and close file
     deallocate(results)
     close(1)
-    
+	
     ! Test2: Prescribed Roots of Varying Scale - 3
     startDegree = 5
     endDegree = 20
-    itnum = 10
+    itnum = 32
     open(unit=1,file="data_files/forwerr_presc.dat")
-    write(1,'(A)') 'Degree, FPML_err, FPML-CP_err, C02AFF_err'
+    write(1,'(A)') 'Degree, FPML-err, FPML-Quad-err, FPML-Comp-err'
     allocate(results(itnum,3))
     deg = startDegree
     do while(deg<=endDegree)
         write(1,'(I10,A)', advance='no') deg, ', '
+		! allocate
         allocate(roots(deg), berr(deg), cond(deg), conv(deg))
-        allocate(a(2,0:deg),w(4*(deg+1)), z(2,deg), zeros(deg))
+		allocate(p_quad(deg+1), roots_quad(deg), berr_quad(deg), cond_quad(deg))
         ! polynomial
         call make_poly(2, deg, exact_roots, p)
-        do j=0,deg
-            a(1,j) = real(p(deg+1-j))
-            a(2,j) = aimag(p(deg+1-j))
-        end do
         do it=1,itnum
             ! FPML, No Polish
-            call main(p, deg, roots, berr, cond, conv, nitmax)
+            call main(p, deg, roots, berr, cond, conv, itmax)
             results(it,1) = max_rel_err(roots, exact_roots, deg)
+			! FPML, Quad
+			p_quad = p
+            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+			roots = roots_quad
+			results(it,2) = max_rel_err(roots, exact_roots, deg)
             ! FPML, Compensated Laguerre Polish
-            call MLPolish(p, deg, roots)
-            results(it,2) = max_rel_err(roots, exact_roots, deg)
-            ! C02AFF
-            ifail = 0
-            call c02aff(a,deg,scal,z,w,ifail)
-            zeros = (/ (cmplx(z(1,j),z(2,j),kind=dp), j=1,deg)/)
-            results(it,3) = max_rel_err(zeros, exact_roots, deg)
+            call main_comp(p, deg, roots, itmax)
+            results(it,3) = max_rel_err(roots, exact_roots, deg)
         end do
-        deallocate(roots, berr, cond, conv, a, w, z, zeros)
-        deallocate(exact_roots, p)
+		! deallocate
+        deallocate(p, exact_roots, roots, berr, cond, conv)
+		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
         ! write results to file
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,1))/itnum, ','
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,2))/itnum, ','
@@ -113,40 +104,38 @@ program forwerr_simple
     ! deallocate results and close file
     deallocate(results)
     close(1)
-    
+
     ! Test3: Small Imaginary Part
     startDegree = 5
     endDegree = 25
-    itnum = 10
+    itnum = 32
     open(unit=1,file="data_files/forwerr_smallimag.dat")
-    write(1,'(A)') 'Degree, FPML_err, FPML-CP_err, C02AFF_err'
+    write(1,'(A)') 'Degree, FPML-err, FPML-Quad-err, FPML-Comp-err'
     allocate(results(itnum,3))
     deg = startDegree
     do while(deg<=endDegree)
         write(1,'(I10,A)', advance='no') deg, ', '
+		! allocate
         allocate(roots(deg), berr(deg), cond(deg), conv(deg))
-        allocate(a(2,0:deg),w(4*(deg+1)), z(2,deg), zeros(deg))
+		allocate(p_quad(deg+1), roots_quad(deg), berr_quad(deg), cond_quad(deg))
         ! polynomial
         call make_poly(3, deg, exact_roots, p)
-        do j=0,deg
-            a(1,j) = real(p(deg+1-j))
-            a(2,j) = aimag(p(deg+1-j))
-        end do
         do it=1,itnum
             ! FPML, No Polish
-            call main(p, deg, roots, berr, cond, conv, nitmax)
+            call main(p, deg, roots, berr, cond, conv, itmax)
             results(it,1) = max_rel_err(roots, exact_roots, deg)
+			! FPML, Quad
+			p_quad = p
+            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+			roots = roots_quad
+			results(it,2) = max_rel_err(roots, exact_roots, deg)
             ! FPML, Compensated Laguerre Polish
-            call MLPolish(p, deg, roots)
-            results(it,2) = max_rel_err(roots, exact_roots, deg)
-            ! C02AFF
-            ifail = 0
-            call c02aff(a,deg,scal,z,w,ifail)
-            zeros = (/ (cmplx(z(1,j),z(2,j),kind=dp), j=1,deg)/)
-            results(it,3) = max_rel_err(zeros, exact_roots, deg)
+            call main_comp(p, deg, roots, itmax)
+            results(it,3) = max_rel_err(roots, exact_roots, deg)
         end do
-        deallocate(roots, berr, cond, conv, a, w, z, zeros)
-        deallocate(exact_roots, p)
+		! deallocate
+        deallocate(p, exact_roots, roots, berr, cond, conv)
+		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
         ! write results to file
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,1))/itnum, ','
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,2))/itnum, ','
@@ -157,40 +146,38 @@ program forwerr_simple
     ! deallocate results and close file
     deallocate(results)
     close(1)
-    
+	
     ! Test4: Wilkinson Polynomial
     startDegree = 5
     endDegree = 20
-    itnum = 10
+    itnum = 32
     open(unit=1,file="data_files/forwerr_wilk.dat")
-    write(1,'(A)') 'Degree, FPML_err, FPML-CP_err, C02AFF_err'
+    write(1,'(A)') 'Degree, FPML-err, FPML-Quad-err, FPML-Comp-err'
     allocate(results(itnum,3))
     deg = startDegree
     do while(deg<=endDegree)
         write(1,'(I10,A)', advance='no') deg, ', '
+		! allocate
         allocate(roots(deg), berr(deg), cond(deg), conv(deg))
-        allocate(a(2,0:deg),w(4*(deg+1)), z(2,deg), zeros(deg))
+		allocate(p_quad(deg+1), roots_quad(deg), berr_quad(deg), cond_quad(deg))
         ! polynomial
         call make_poly(4, deg, exact_roots, p)
-        do j=0,deg
-            a(1,j) = real(p(deg+1-j))
-            a(2,j) = aimag(p(deg+1-j))
-        end do
         do it=1,itnum
             ! FPML, No Polish
-            call main(p, deg, roots, berr, cond, conv, nitmax)
+            call main(p, deg, roots, berr, cond, conv, itmax)
             results(it,1) = max_rel_err(roots, exact_roots, deg)
+			! FPML, Quad
+			p_quad = p
+            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+			roots = roots_quad
+			results(it,2) = max_rel_err(roots, exact_roots, deg)
             ! FPML, Compensated Laguerre Polish
-            call MLPolish(p, deg, roots)
-            results(it,2) = max_rel_err(roots, exact_roots, deg)
-            ! C02AFF
-            ifail = 0
-            call c02aff(a,deg,scal,z,w,ifail)
-            zeros = (/ (cmplx(z(1,j),z(2,j),kind=dp), j=1,deg)/)
-            results(it,3) = max_rel_err(zeros, exact_roots, deg)
+            call main_comp(p, deg, roots, itmax)
+            results(it,3) = max_rel_err(roots, exact_roots, deg)
         end do
-        deallocate(roots, berr, cond, conv, a, w, z, zeros)
-        deallocate(exact_roots, p)
+		! deallocate
+        deallocate(p, exact_roots, roots, berr, cond, conv)
+		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
         ! write results to file
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,1))/itnum, ','
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,2))/itnum, ','
@@ -201,7 +188,9 @@ program forwerr_simple
     ! deallocate results and close file
     deallocate(results)
     close(1)
+	
 contains
+	
     !************************************************
     !                       make_poly               *
     !************************************************
@@ -244,7 +233,8 @@ contains
             else
                 exact_roots = (/ (cmplx(2.0_dp**(-(deg-1)/2+j)-3.0_dp,0,kind=dp), j=0,deg-1)/)
             end if
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(3)
             ! Small Imaginary Part
             allocate(exact_roots(deg), p(deg+1))
@@ -255,12 +245,14 @@ contains
                     exact_roots(j) = cmplx(j,10*mu,kind=dp)
                 end if
             end do
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
             case(4)
             ! Wilkinson Polynomial
             allocate(exact_roots(deg), p(deg+1))
             exact_roots = (/ (cmplx(j,0,kind=dp), j=1,deg)/)
-            call RootCoeffCplx(deg,exact_roots,p)
+			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
+            call rootCoeffCplx(deg,exact_roots,p)
         end select
     end subroutine make_poly
     !************************************************
