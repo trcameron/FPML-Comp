@@ -2,14 +2,15 @@
 FPML-Comp: Is a compensated polishing library built of the FPML library. All type declerations, functions, and subroutines are in the modules *eft*, *fpml*, and *fpml-comp*, which are located in the src directory.
 ## Authors
 * [Thomas R. Cameron](https://thomasrcameron.com)
-    * Mathematics and Computer Science Department, Davidson College
-    * [Email: thcameron@davidson.edu](mailto:thcameron@davidson.edu)
-* [Aidan O'Neill](undergraduate researcher)
+    * Mathematics Department, Penn State Erie The Behrend College
+    * [Email: trc5475@psu.edu](mailto:trc5475@psu.edu)
+* [Aidan O'Neill]
+	* [Email: aconeill@umass.edu](mailto:aconeill@umass.edu)
 
 ## Instructions
-Below are instructions for installing FPML-COMP tests and compiling the TeX figures. These instructions have been tested on macOS Mojave 10.14.5 and Ubuntu 18.04.2 LTS and will work on most Mac and Linux systems provided the dependencies are met.
+Below are instructions for installing FPML-COMP tests and compiling the TeX figures. These instructions have been tested on macOS Catalina 10.15.6 and Ubuntu 18.04.2 LTS and will work on most Mac and Linux systems provided the dependencies are met.
 ### Installation
-First, open the make.inc file to specify the Fortran compiler and flags. The default settings use the *gfortran* compiler with flags *-O2*. Note that mpfun objects are also defined and the location of the NAG Library is defined. Since the NAG Library is proprietary software, we have commented out this location and all tests that depend on the library in the makefile.
+First, open the make.inc file to specify the Fortran compiler and flags. The default settings use the *gfortran* compiler with flags *-O2*. Note that mpfun objects are also defined in this file.
 
 All tests can be installed by running *make install* from the root directory of FPML-Comp.
 Once installed, *make clean* can be run to remove the leftover installation files, such as .mod and .o files. Note that the installation is done relative to the location of the FPML-Comp directory and nothing is installed outside of this directory. To uninstall simply run *make uninstall* from the root directory of FPML-Comp.
