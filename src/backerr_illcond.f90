@@ -10,7 +10,7 @@ program backerr_illcond
     use mproutines
     implicit none
     ! testing variables
-    integer                                     :: deg, it, j, startDegree, endDegree, itnum
+    integer                                     :: deg, it, j, startDegree, endDegree, itnum, clock_rate, clock_start, clock_stop
     real(kind=dp), allocatable                  :: results(:,:)
     ! FPML variables
     integer, parameter                          :: itmax = 30
@@ -26,8 +26,8 @@ program backerr_illcond
     itnum=32
     call init_random_seed()
     open(unit=1,file="data_files/backerr_illcond_unit.dat")
-    write(1,'(A)') 'Degree, FPML-err, FPML-Quad-err, FPML-Comp-err'
-    allocate(results(itnum,3))
+    write(1,'(A)') 'Degree, FPML-time, FPML-err, FPML-Quad-time, FPML-Quad-err, FPML-Comp-time, FPML-Comp-err'
+    allocate(results(itnum,6))
     deg = startDegree
     do while(deg<=endDegree)
         write(1,'(I10,A)', advance='no') deg, ', '
@@ -39,23 +39,38 @@ program backerr_illcond
 			p(deg+1) = cmplx(1.0_dp,0.0_dp,kind=dp)
 			call rootCoeffCplx(deg, roots, p)
             ! FPML, No Polish
+            call system_clock(count_rate=clock_rate)
+            call system_clock(count=clock_start)
             call main(p, deg, roots, berr, cond, conv, itmax)
-            results(it,1) = error(p, roots, deg)
-            ! FPML, Quad
-			p_quad = p
-            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
-			roots = roots_quad
+            call system_clock(count=clock_stop)
+            results(it,1)=dble(clock_stop-clock_start)/dble(clock_rate)
             results(it,2) = error(p, roots, deg)
+            ! FPML, Quad Precision
+			p_quad = p
+            call system_clock(count_rate=clock_rate)
+            call system_clock(count=clock_start)
+            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+            call system_clock(count=clock_stop)
+            results(it,3)=dble(clock_stop-clock_start)/dble(clock_rate)
+			roots = roots_quad
+            results(it,4) = error(p, roots, deg)
             ! FPML, Compensated Laguerre Polish
+            call system_clock(count_rate=clock_rate)
+            call system_clock(count=clock_start)
             call main_comp(p, deg, roots, itmax)
-            results(it,3) = error(p, roots, deg)
+            call system_clock(count=clock_stop)
+            results(it,5)=dble(clock_stop-clock_start)/dble(clock_rate)
+            results(it,6) = error(p, roots, deg)
         end do
         deallocate(p, roots, berr, cond, conv)
 		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
         ! write results to file
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,1))/itnum, ','
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,2))/itnum, ','
-        write(1,'(ES15.2)') sum(results(1:itnum,3))/itnum
+        write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,3))/itnum, ','
+        write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,4))/itnum, ','
+        write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,5))/itnum, ','
+        write(1,'(ES15.2)') sum(results(1:itnum,6))/itnum
         ! update deg
         deg = deg + 10
     end do
@@ -68,8 +83,8 @@ program backerr_illcond
     endDegree=100
     itnum=32
     open(unit=1,file="data_files/backerr_illcond_trunc.dat")
-    write(1,'(A)') 'Degree, FPML-err, FPML-Quad-err, FPML-Comp-err'
-    allocate(results(itnum,3))
+    write(1,'(A)') 'Degree, FPML-time, FPML-err, FPML-Quad-time, FPML-Quad-err, FPML-Comp-time, FPML-Comp-err'
+    allocate(results(itnum,6))
     deg = startDegree
     do while(deg<=endDegree)
         write(1,'(I10,A)', advance='no') deg, ', '
@@ -83,23 +98,38 @@ program backerr_illcond
                 p(j) = p(j-1)/(j-1)
             end do
             ! FPML, No Polish
+            call system_clock(count_rate=clock_rate)
+            call system_clock(count=clock_start)
             call main(p, deg, roots, berr, cond, conv, itmax)
-            results(it,1) = error(p, roots, deg)
-            ! FPML, Quad
-			p_quad = p
-            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
-			roots = roots_quad
+            call system_clock(count=clock_stop)
+            results(it,1)=dble(clock_stop-clock_start)/dble(clock_rate)
             results(it,2) = error(p, roots, deg)
+            ! FPML, Quad Precision
+			p_quad = p
+            call system_clock(count_rate=clock_rate)
+            call system_clock(count=clock_start)
+            call main_quad(p_quad, deg, roots_quad, berr_quad, cond_quad, conv, itmax)
+            call system_clock(count=clock_stop)
+            results(it,3)=dble(clock_stop-clock_start)/dble(clock_rate)
+			roots = roots_quad
+            results(it,4) = error(p, roots, deg)
             ! FPML, Compensated Laguerre Polish
+            call system_clock(count_rate=clock_rate)
+            call system_clock(count=clock_start)
             call main_comp(p, deg, roots, itmax)
-            results(it,3) = error(p, roots, deg)
+            call system_clock(count=clock_stop)
+            results(it,5)=dble(clock_stop-clock_start)/dble(clock_rate)
+            results(it,6) = error(p, roots, deg)
         end do
         deallocate(p, roots, berr, cond, conv)
 		deallocate(p_quad, roots_quad, berr_quad, cond_quad)
         ! write results to file
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,1))/itnum, ','
         write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,2))/itnum, ','
-        write(1,'(ES15.2)') sum(results(1:itnum,3))/itnum
+        write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,3))/itnum, ','
+        write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,4))/itnum, ','
+        write(1,'(ES15.2,A)', advance='no') sum(results(1:itnum,5))/itnum, ','
+        write(1,'(ES15.2)') sum(results(1:itnum,6))/itnum
         ! update deg
         deg = deg + 10
     end do

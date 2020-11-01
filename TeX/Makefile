@@ -6,7 +6,7 @@ include ../make.inc
 all: backerr_illcond backerr_wellcond horner_runErr laguerre_limitAcc newton_limitAcc clean
 	
 backerr_illcond:
-	$(LC) backerr_illcond.tex
+	$(LC) backerr_illcond_err.tex && $(LC) backerr_illcond_time.tex
 
 backerr_wellcond:
 	$(LC) backerr_wellcond_err.tex && $(LC) backerr_wellcond_time.tex
